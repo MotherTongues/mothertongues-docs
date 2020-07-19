@@ -52,7 +52,7 @@ things:
 1.  Install mothertongues, see [installation](mtd-installation).
 2.  Write a valid Mother Tongues Language configuration file. See
     [guides](mtd-guides)
-3.  Write valid Mother Tongues data resource configuration files. See,
+3.  Write valid Mother Tongues data resource configuration files. See
     [guides](mtd-guides)
 
 Then, build with the command line:

@@ -1,5 +1,5 @@
 module.exports = {
-  title: 'Mother Tongues Documentation',
+  title: 'Mother Tongues',
   tagline: 'Tools for language revitalization',
   url: 'https://docs.mothertongues.org',
   baseUrl: '/',
