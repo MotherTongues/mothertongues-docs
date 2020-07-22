@@ -7,7 +7,7 @@ import useBaseUrl from '@docusaurus/useBaseUrl';
 
 *These guides assume you are comfortable with the [Command Line](https://en.wikipedia.org/wiki/Command-line_interface), [Git](https://en.wikipedia.org/wiki/Git) and [NPM](https://en.wikipedia.org/wiki/Npm_(software)). You must have all of these installed on your machine. You are also strongly encouraged to have a [GitHub](https://github.com) account. You are encouraged to fork or clone the [Mother Tongues Dictionary Starter](https://github.com/roedoejet/mtd-starter) and follow along.*
 
-### Adding a User Interface
+## Adding a User Interface
 
 This is a guide for visualizing your data through a user interface. 
 
@@ -15,7 +15,7 @@ This is a guide for visualizing your data through a user interface.
 This guide assumes you have worked through all the steps in [preparing your data](mtd-guides-prepare).
 :::
 
-### Exporting your data
+## Exporting your data
 
 First, you need to export the JavaScript files required by any MTD UI.
 
@@ -56,7 +56,7 @@ By simply changing the `config-*.js` and `dict_cached-*.js` files in your MTD St
 mobile UI](https://github.com/roedoejet/mothertongues-ui).
 :::
 
-### MTD Mobile
+## MTD Mobile
 
 Here are the steps for creating a mobile dictionary on your machine.
 
@@ -87,7 +87,7 @@ Here are the steps for creating a mobile dictionary on your machine.
 `ionic serve`
 
 
-### MTD Web
+## MTD Web
 
 Here are the steps for creating a web dictionary on your machine.
 
@@ -121,3 +121,88 @@ Here are the steps for creating a web dictionary on your machine.
 
 `git commit -a -m 'updated data' && git push origin master`
 
+### File structure
+
+Below is an incomplete snapshot of the file structure for a [MTD Web dictionary](https://github.com/MotherTongues/mothertongues-UI-Web)
+
+```
+📦mothertongues-UI-Web
+ ┣ 📂projects
+ ┃ ┣ 📂mtd
+ ┃ ┃ ┗ 📂e2e
+ ┃ ┃ ┗ 📂src
+ ┃ ┃   ┗ 📂e2e
+ ┃ ┃      ┗ 📂app
+ ┃ ┃      ┗ 📂assets
+ ┃ ┃      ┗ 📂config
+ ┃ ┃      ┗ 📂environments
+ ┃ ┃      ┗ 📂themes
+ ┃ ┃      ┗ 📜styles.scss
+ ┃ ┗ 📂server
+ ┣ 📂src
+ ┣ 📂www
+ ┣ 📜angular.json
+ ┣ 📜package.json
+```
+
+### Configuring your dictionary
+Your dictionary configuration file is found inside the 'config' folder in the [MTD UI Web project](#file-structure).
+
+The `config.ts` file contains an object called `META` which is where you should configure your app.
+
+```typescript
+export const META: Meta = {
+  browseAudio: true,
+  contributors: [
+    {
+      name: 'Aidan Pine',
+      title: 'Lead Developer',
+      text:
+        /* tslint:disable */
+        "Here is where you description of the person goes. You can put plain text, or <b>even</b> mark it up with <i>html</i>",
+      img: false
+    }
+  ],
+  languages: [{ label: 'en', value: 'en' }],
+  copyright: {
+    name: 'Mother Tongues',
+    url: 'https://mothertongues.org'
+  },
+  links: {
+    github: {
+      display: false,
+      url: ''
+    },
+    medium: {
+      display: false,
+      url: ''
+    },
+    facebook: {
+      display: false,
+      url: ''
+    },
+    youtube: {
+      display: false,
+      url: ''
+    }
+  }
+};
+```
+
+### Adding translations
+
+You can translate the entire interface to your Mother Tongues dictionary by doing the following:
+
+1. Add the language to the languages array in the META config (currently only english is there). You should use a 2 or 3 character abbreviated form here. You will have the chance to give a full name to the language later.
+
+2. Add an empty file to `mothertongues-UI-Web/projects/mtd/src/assets/i18n/` with your language's configured 2 or 3 character form. 
+
+:::tip
+Example, `dan.json` for Danish.
+:::
+
+3. From the root of the project, run `npm run-script extract-translations`
+
+4. Translate all of the empty strings in your new translation file. Either do it directly in the json file, or upload it to a service like [POEditor](https://poeditor.com/) for collaborative translations.
+
+Then, when you rebuild your app, the user will have the option to translate into your language 🎉

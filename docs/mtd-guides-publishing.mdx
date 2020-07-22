@@ -102,15 +102,15 @@ Once you've moved your `icon.png` and `splash.png` files to your
 
 There is a built version of the app in [mothertongues-ui/www](#file-structure) - just replace the `mothertongues-ui/www/assets/js/config.js` and `mothertongues-ui/www/assets/js/dict_cached.js` files with your [exported data](mtd-guides-ui#exporting-your-data), commit and push the changes, and then [turn on GitHub Pages](https://docs.github.com/en/enterprise/2.14/user/articles/configuring-a-publishing-source-for-github-pages#:~:text=On%20GitHub%20Enterprise%2C%20navigate%20to,Click%20Save) and your app will be published online.
 
-### Android (Google Play)
+## Android (Google Play)
 
-#### Preliminary steps
+### Preliminary steps
 
-##### Google Play Developer Account
+#### Google Play Developer Account
 
 Before publishing your app to the Google Play store, you'll need to [register for a Google Play Developer account](https://support.google.com/googleplay/android-developer/answer/6112435?hl=en). At current time of writing, this involves a one-time $25USD fee. The following steps can be done once you've made your account.
 
-##### Install Android Studio
+#### Install Android Studio
 
 You must have [Android Studio](https://developer.android.com/studio/) installed, and also ensure your installation includes [keytool](https://docs.oracle.com/javase/6/docs/technotes/tools/windows/keytool.html). You must also have the Android SDK installed that matches your `config.xml`:
 
@@ -124,11 +124,11 @@ You must have [Android Studio](https://developer.android.com/studio/) installed,
     <preference name="android-targetSdkVersion" value="28" />
 ```
 
-##### Testing
+#### Testing
 
 I recommend also installing [Genymotion](https://www.genymotion.com/fun-zone/) to run and test your app.
 
-#### Building
+### Building
 
 1. Create a signing key
 
@@ -226,11 +226,11 @@ Then, create a new app and upload your
 `~/mothertongues-UI/resources/platforms/android/app/build/outputs/apk/release/release.apk`
 file.
 
-#### Re-building
+### Re-building
 
 You must first 'bump' the [version](#version) in `config.xml` and follow steps 3, 4, 5 using the keystore you already created.
 
-#### Uploading to Google Play
+### Uploading to Google Play
 
 First, log in to your Google Play account. Then, create an new application:
 
@@ -261,25 +261,25 @@ The screenshot below shows boxes that **have not** been checked:
 
 <img alt="opt out" src={useBaseUrl('img/check-boxes.png')} />
 
-### iOS
+## iOS
 
-#### Preliminary steps
+### Preliminary steps
 
 You **must** have a Mac do the following build steps on a Mac. Unfortunately, there's no way around this. Both [Travis](https://travis-ci.org/) and [GitHub Actions](https://github.com/features/actions) let you spin up Mac hardware, so if you don't own a Mac, you might look to adapt these steps to one of those.
 
-##### Apple Developer license
+#### Apple Developer license
 
 You must have an [Apple Developer License](https://developer.apple.com/programs/enroll/) in order to upload an app to the Apple App Store. At time of writing, this is a **yearly** $99USD fee.
 
-##### Xcode
+#### Xcode
 
 Your mac must have [Xcode installed](https://medium.com/@LondonAppBrewery/how-to-download-and-setup-xcode-10-for-ios-development-b63bed1865c). At time of writing, you must also have MacOS 10.15.0 (Catalina) or higher, Xcode 11, and iOS SDK 13 as apps targetting previous SDKs have been [disallowed since March 2019](https://developer.apple.com/news/?id=09122018c).
 
 :::note
-If you think that the $99USD/yr fee is high (particularly when publishing free/open-source apps), and if you think the whole bit about disallowing anything but Macs running the most current OS seems really strict, you're not wrong. Apple is a necessary evil for many of us, but it's a shame that they seem to not care at all about developer experience or open source 🙃
+Apple's $99USD/yr fee, constantly changing requirements, and utter lack of support make publishing on iOS a total pain. It's a shame, but they're usually a necessary evil - just remember to take deep breaths as you deal with bugs 🙃 
 :::
 
-#### Building
+### Building with Xcode
 
 1. Add ios platform
 
@@ -313,9 +313,40 @@ Make sure you're in your dictionary's directory (usually `~/mothertongues-UI`) a
 
 <img alt="add account" src={useBaseUrl('img/add-account.png')} />
 
-8. 
+8. Creating credentials
 
-TODO: SIGNING
+Frankly, code signing on iOS is a huge hassle. First, create an [App ID](https://hyperpad.zendesk.com/hc/en-us/articles/205083245-Create-an-App-ID), then you must [create a 'distribution provisioning profile'](https://hyperpad.zendesk.com/hc/en-us/articles/204378199-Create-a-Distribution-Provisioning-Profile) in order to provision your app for being downloaded on the App Store.
+Then, you need to select 'automatic code signing' in Xcode:
+
+<img alt="auto-sign" src={useBaseUrl('img/auto-sign.png')} />
+
+9. Making your app Store page
+
+There are lots of [guides](https://hyperpad.zendesk.com/hc/en-us/articles/205083485-Create-a-new-App-on-iTunes-Connect) on how to do this online. But it's essentially the same as the
+[Android process](#uploading-to-google-play). You'll need to fill out some meta data and upload screenshots etc.
+
+10. Select a Generic iOS Device build target
+
+<img alt="build target" src={useBaseUrl('img/build-target.png')} />
+
+11. Archive the build
+
+<img alt="archive" src={useBaseUrl('img/archive.png')} />
+
+12. Then, Validate and Distribute your app
+
+You'll need to select 'iOS Store' when distributing, and then 'upload'. This will upload your app to iTunes Connect where you can then test it out on TestFlight or submit it for review to be released.
+
+<img alt="distribute" src={useBaseUrl('img/distribute.png')} />
+
+### Rebuilding
+
+To re-build (after updating data for example), you must do steps 2, 3, 10, 11 and 12 from the [build](#building-with-xcode) process.
+
+### fastlane
+
+As you can see, [building](#building-with-xcode) can be time consuming, particularly if you have many steps. It's also difficult to keep up with the hardware requirements imposed by Apple.
+So, you can set up [fastlane](https://fastlane.tools/) to automate some of the steps.
 
 ## Web
 
