@@ -1,0 +1,364 @@
+---
+id: mtd-guides-publishing
+title: Publishing your dictionary
+---
+
+import useBaseUrl from '@docusaurus/useBaseUrl';
+
+*These guides assume you are comfortable with the [Command Line](https://en.wikipedia.org/wiki/Command-line_interface), [Git](https://en.wikipedia.org/wiki/Git), [Python](https://en.wikipedia.org/wiki/Python_(programming_language)) and [NPM](https://en.wikipedia.org/wiki/Npm_(software)). You must have all of these installed on your machine. You are also strongly encouraged to have a [GitHub](https://github.com) account. You are encouraged to fork or clone the [Mother Tongues Dictionary Starter](https://github.com/roedoejet/mtd-starter) and follow along.*
+
+The simplest way to publish your app is on the web. Publishing to the Android and iOS app stores is an involved process. If you're just starting out, it's highly recommended that you start with the web or mobile (GitHub Pages) deployments first before publishing to Android or iOS.
+
+To get started, you'll need to have [prepared](mtd-guides-prepare) and
+[built](mtd-guides-ui) your dictionary.
+
+:::note
+This process for building apps, and the complexity that comes with it, is just a fact of app-building and would be the same for any other dictionary app you build. Sorry! Don't be mad at Mother Tongues! 😃
+:::
+
+## Mobile
+
+Because the [mobile MTD UI](https://github.com/roedoejet/mothertongues-ui) is built with [Ionic](https://ionicframework.com/), the code base stays the same for both Android and iOS builds. Therefore some of the changes only need to be done once.
+
+### File Structure
+
+Note, the following is an *incomplete* look at the file structure of a typical [mobile MTD UI](https://github.com/roedoejet/mothertongues-ui). When you clone/fork it, there will be other files/folders. For the purpose of this guide, these are the ones you will need to know about.
+
+```
+📦mothertongues-UI
+ ┣ 📂plugins
+ ┣ 📂resources
+ ┃ ┣ 📜icon.png
+ ┃ ┗ 📜splash.png
+ ┣ 📂src
+ ┣ 📂www
+ ┣ 📜config.xml
+ ┣ 📜package.json
+```
+
+### Cordova Configuration
+
+Information about your app is kept in the `config.xml` file at the root of your [project](#file-structure). The vast majority of this, you will never need to edit, although you can read more about Cordova configuration [here](https://cordova.apache.org/docs/en/latest/config_ref/) if you're curious.
+
+The parts you will need to edit are at the very beginning of the file:
+
+```xml {3-6,9,11-12}
+<?xml version='1.0' encoding='utf-8'?>
+<widget 
+        android-packageName="com.YOUR_ORGANIZATION.YOUR_APP_SLUG" 
+        android-versionCode="10000" 
+        ios-CFBundleIdentifier="com.YOUR_ORGANIZATION.YOUR_APP_SLUG" 
+        version="1.0"
+        xmlns="http://www.w3.org/ns/widgets" 
+        xmlns:cdv="http://cordova.apache.org/ns/1.0">
+    <name>Ehattesaht</name>
+    <description />
+    <author email="info@mothertongues.org" 
+            href="http://mothertongues.org/">Aidan Pine</author>
+    <content src="index.html" />
+    ...
+```
+
+#### Bundle ID
+
+First, change the [bundle identifiers](https://stackoverflow.com/questions/11347470/what-does-bundle-identifier-mean-in-an-ios-project) for all the platforms you wish to build. For Android change `android-packageName` and for iOS, change `ios-CFBundleIdentifer`. 
+
+:::important
+Pay attention to give your bundle ids appropriate names - you cannot change them once you've published the app. I suggest keeping the identifiers the same for both Android and iOS if possible.
+:::
+
+#### Version
+
+For iOS, you can set the version by changing `version`, but for Android, you change it by changing `android-versionCode`.
+
+:::note
+The `version` attribute accepts decimal values, but the `android-versionCode` requires 5 digit integers.
+:::
+
+#### Name
+
+Change your app's name by editing the text inside the `name` element highlighted above.
+
+:::note
+You may have trouble uploading your app if you use certain non-ASCII characters. Frustratingly, the full list of accepted characters does not seem to be published.
+:::
+
+#### Author
+
+You can change your email, website and name as the author by editing the `author` element highlighted above.
+
+### Resources
+
+Ionic will generate all of the different sizes you need for your App's icon and splash screen, but you need to first provide it with templates.
+
+Your source image for icons should be at least 1024x1024 and your splash screen artwork should be 2732x2732. For more information please see [Ionic's documentation](https://ionicframework.com/docs/cli/commands/cordova-resources).
+
+Once you've moved your `icon.png` and `splash.png` files to your
+`~/mothertongues-UI/resources` directory, you can generate all of the necessary icon and splash image sizes:
+
+`ionic cordova resources`
+
+### GitHub Pages
+
+There is a built version of the app in [mothertongues-ui/www](#file-structure) - just replace the `mothertongues-ui/www/assets/js/config.js` and `mothertongues-ui/www/assets/js/dict_cached.js` files with your [exported data](mtd-guides-ui#exporting-your-data), commit and push the changes, and then [turn on GitHub Pages](https://docs.github.com/en/enterprise/2.14/user/articles/configuring-a-publishing-source-for-github-pages#:~:text=On%20GitHub%20Enterprise%2C%20navigate%20to,Click%20Save) and your app will be published online.
+
+### Android (Google Play)
+
+#### Preliminary steps
+
+##### Google Play Developer Account
+
+Before publishing your app to the Google Play store, you'll need to [register for a Google Play Developer account](https://support.google.com/googleplay/android-developer/answer/6112435?hl=en). At current time of writing, this involves a one-time $25USD fee. The following steps can be done once you've made your account.
+
+##### Install Android Studio
+
+You must have [Android Studio](https://developer.android.com/studio/) installed, and also ensure your installation includes [keytool](https://docs.oracle.com/javase/6/docs/technotes/tools/windows/keytool.html). You must also have the Android SDK installed that matches your `config.xml`:
+
+```xml {7}
+<?xml version='1.0' encoding='utf-8'?>
+<widget android-versionCode="10000" id="org.mothertongues.mtdui" version="1.0" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
+    <name>mothertongues-UI</name>
+    <description />
+    <author email="info@mothertongues.org" href="http://mothertongues.org/">Aidan Pine</author>
+...
+    <preference name="android-targetSdkVersion" value="28" />
+```
+
+##### Testing
+
+I recommend also installing [Genymotion](https://www.genymotion.com/fun-zone/) to run and test your app.
+
+#### Building
+
+1. Create a signing key
+
+You must have [keytool](https://docs.oracle.com/javase/6/docs/technotes/tools/windows/keytool.html). Then, run: 
+```bash
+keytool -genkey -v -keystore my-release-key.keystore -alias alias_name -keyalg RSA -keysize 2048 -validity 10000
+```
+
+:::important
+You can change `my-release-key.keystore` to any name. But it is very important to keep this file in a safe spot. If you lose it, or forget the password, you will not be able to update your app!!
+:::
+
+2. Add the platform:
+
+Make sure you're in your dictionary's directory (usually `~/mothertongues-UI`) and then:
+
+```bash
+ionic cordova platform add android
+```
+
+After adding the platform, the cordova plugins that we use automatically register some permissions. Unfortunately, the Media plugin also registers the `RECORD_AUDIO` and `READ_PHONE_STATE` permissions, which we don't need for MotherTongues and which give an unnecessary warning to the installer.
+So, to fix this, go to `~/mothertongues-UI/platforms/android/android.json` and remove the highlighted lines below:
+```json {8-11,16-19}
+    "AndroidManifest.xml": {
+        "parents": {
+          "/*": [
+            {
+              "xml": "<uses-permission android:name=\"android.permission.WRITE_EXTERNAL_STORAGE\" />",
+              "count": 3
+            },
+            {
+              "xml": "<uses-permission android:name=\"android.permission.RECORD_AUDIO\" />",
+              "count": 1
+            },
+            {
+              "xml": "<uses-permission android:name=\"android.permission.MODIFY_AUDIO_SETTINGS\" />",
+              "count": 1
+            },
+            {
+              "xml": "<uses-permission android:name=\"android.permission.READ_PHONE_STATE\" />",
+              "count": 1
+            }
+          ]
+        }
+      }
+    }
+  },
+  ...
+  ```
+
+Then, go to `~/mothertongues-UI/platforms/android/app/src/main/AndroidManifest.xml` and remove the following highlighted lines:
+
+```xml {14,16}
+<?xml version='1.0' encoding='utf-8'?>
+<manifest android:hardwareAccelerated="true" android:versionCode="10000" android:versionName="1.0" package="org.mothertongues.mtdui" xmlns:android="http://schemas.android.com/apk/res/android">
+    <supports-screens android:anyDensity="true" android:largeScreens="true" android:normalScreens="true" android:resizeable="true" android:smallScreens="true" android:xlargeScreens="true" />
+    <uses-permission android:name="android.permission.INTERNET" />
+    <application android:hardwareAccelerated="true" android:icon="@mipmap/ic_launcher" android:label="@string/app_name" android:supportsRtl="true">
+        <activity android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale|smallestScreenSize|screenLayout|uiMode" android:label="@string/activity_name" android:launchMode="singleTop" android:name="MainActivity" android:theme="@android:style/Theme.DeviceDefault.NoActionBar" android:windowSoftInputMode="adjustResize">
+            <intent-filter android:label="@string/launcher_name">
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+    </application>
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+</manifest>
+```
+
+3. Build your android app:
+
+```bash
+ionic cordova build android --release
+```
+
+Your app will then be built at
+`~/mothertongues-UI/resources/platforms/android/app/build/outputs/apk/release/app-release-unsigned.apk`.
+
+4. Then, sign your app,
+
+```bash
+jarsigner -verbose -sigalg SHA1withRSA -digestalg SHA1 -keystore "your.keystore" "~/mothertongues-UI/resources/platforms/android/app/build/outputs/apk/release/app-release-unsigned.apk" alias_name
+```
+
+5. Then, zip-align your app,
+
+```bash
+zipalign -v 4 "~/mothertongues-UI/resources/platforms/android/app/build/outputs/apk/release/app-release-unsigned.apk" "~/mothertongues-UI/resources/platforms/android/app/build/outputs/apk/release/release.apk"
+```
+
+Then, create a new app and upload your
+`~/mothertongues-UI/resources/platforms/android/app/build/outputs/apk/release/release.apk`
+file.
+
+#### Re-building
+
+You must first 'bump' the [version](#version) in `config.xml` and follow steps 3, 4, 5 using the keystore you already created.
+
+#### Uploading to Google Play
+
+First, log in to your Google Play account. Then, create an new application:
+
+<img alt="new app" src={useBaseUrl('img/new-app.png')} />
+
+There, you will have to fill out information such as the title, description and contact information for your app. You will also have to complete a 'content rating', categorize your app, add screenshots, and choose the countries to allow distribution for.
+
+You will also have to create a new release (the screenshot shows a Beta release for example):
+
+<img alt="new release" src={useBaseUrl('img/app-release.png')} />
+
+And:
+
+<img alt="create release" src={useBaseUrl('img/create-release.png')} />
+
+Opt out of Google managing your signing:
+
+<img alt="opt out" src={useBaseUrl('img/opt-out.png')} />
+
+And drag/drop your apk:
+
+<img alt="opt out" src={useBaseUrl('img/add-apk.png')} />
+
+Then, you can upload the `~/mothertongues-UI/resources/platforms/android/app/build/outputs/apk/release/release.apk` file
+
+If you've successfully checked off all of the boxes, you can review and 'roll out' your release to production to publish on the Google Play Store after testing it out.
+The screenshot below shows boxes that **have not** been checked:
+
+<img alt="opt out" src={useBaseUrl('img/check-boxes.png')} />
+
+### iOS
+
+#### Preliminary steps
+
+You **must** have a Mac do the following build steps on a Mac. Unfortunately, there's no way around this. Both [Travis](https://travis-ci.org/) and [GitHub Actions](https://github.com/features/actions) let you spin up Mac hardware, so if you don't own a Mac, you might look to adapt these steps to one of those.
+
+##### Apple Developer license
+
+You must have an [Apple Developer License](https://developer.apple.com/programs/enroll/) in order to upload an app to the Apple App Store. At time of writing, this is a **yearly** $99USD fee.
+
+##### Xcode
+
+Your mac must have [Xcode installed](https://medium.com/@LondonAppBrewery/how-to-download-and-setup-xcode-10-for-ios-development-b63bed1865c). At time of writing, you must also have MacOS 10.15.0 (Catalina) or higher, Xcode 11, and iOS SDK 13 as apps targetting previous SDKs have been [disallowed since March 2019](https://developer.apple.com/news/?id=09122018c).
+
+:::note
+If you think that the $99USD/yr fee is high (particularly when publishing free/open-source apps), and if you think the whole bit about disallowing anything but Macs running the most current OS seems really strict, you're not wrong. Apple is a necessary evil for many of us, but it's a shame that they seem to not care at all about developer experience or open source 🙃
+:::
+
+#### Building
+
+1. Add ios platform
+
+Make sure you're in your dictionary's directory (usually `~/mothertongues-UI`) and then:
+
+`ionic cordova platform add ios`
+
+2. Build your iOS app:
+
+`ionic cordova build ios --release`
+
+3. Open the newly created xcodeproj file at `~/mothertongues-UI/platforms/ios/<YOUR_APP_NAME>.xcodeproj`
+
+4. Change to 'legacy build'
+
+`File > Project Settings`
+
+<img alt="legacy" src={useBaseUrl('img/legacy.png')} />
+
+5. Change plist by adding ['App Uses Non-Exempt Encryption' to NO](https://stackoverflow.com/questions/35739361/itsappusesnonexemptencryption-export-compliance-while-internal-testing)
+
+<img alt="plist" src={useBaseUrl('img/plist.png')} />
+
+6. [Disable Push Notifications*](https://stackoverflow.com/questions/25017933/cordova-how-to-remove-push-notification-on-ios)
+
+<img alt="push notifications" src={useBaseUrl('img/push-notifications.png')} /> 
+
+*photo cred: Steven de Salas
+
+7. Add your Apple Developer account
+
+<img alt="add account" src={useBaseUrl('img/add-account.png')} />
+
+8. 
+
+TODO: SIGNING
+
+## Web
+
+Building your web version is much less involved than building an app, so if this is all you need, count yourself lucky!
+
+### GitHub Pages
+
+If you've forked and cloned the [official MotherTongues UI Web repository](https://github.com/mothertongues/mothertongues-ui-web), then all you need to to is [prepare](mtd-guides-prepare) and [build](mtd-guides-ui) your dictionary and then commit and push the changes:
+
+```bash
+cd ~/mothertongues-UI-Web && git add . && git commit -a -m "new build" && git push
+```
+
+### Custom hosting
+
+To host on your own server:
+
+Change the app name and i18nPrefix in `~/mothertongues-UI-Web/projects/mtd/src/environments/environment.prod.ts` to your Dictionary name and the directory your dictionary will be hosted at.
+So, for `https://example.com/dictionaries/mydictionary` you would put:
+
+```typescript {2,6}
+export const environment = {
+  appName: 'My Dictionary',
+  envName: 'PROD',
+  production: true,
+  test: false,
+  i18nPrefix: '/dictionaries/mydictionary'
+  ...
+```
+
+Then, if your dictionary is being served anywhere other than at the root of your website (ie, if you put anything other than `/` in the `i18nPrefix` above) then change the `~/mothertongues--UI-Web/package.json` accordingly:
+
+```json {10}
+{
+  "name": "mtd-web-ui",
+  "version": "1.0.0",
+  "license": "MIT",
+  "scripts": {
+    "ng": "ng",
+    "start": "ng serve --open",
+    "start:prod": "npm run build:prod && npm run server",
+    "build": "ng build",
+    "build:prod": "ng build --prod --output-path build --base-href /dictionaries/mydictionary/",
+  
+  ...
+```
