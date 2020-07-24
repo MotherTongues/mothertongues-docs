@@ -34,6 +34,7 @@ This demo uses 'danish' as the example language - you should replace all instanc
  ┣ 📜README.md
  ┣ 📜alphabet.csv
  ┣ 📜index.html
+ ┣ 📜package.json
  ┗ 📜requirements.txt
 ```
 

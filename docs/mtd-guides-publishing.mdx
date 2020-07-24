@@ -348,7 +348,165 @@ To re-build (after updating data for example), you must do steps 2, 3, 10, 11 an
 As you can see, [building](#building-with-xcode) can be time consuming, particularly if you have many steps. It's also difficult to keep up with the hardware requirements imposed by Apple.
 So, you can set up [fastlane](https://fastlane.tools/) to automate some of the steps.
 
+There are many ways to use fastlane, this small guide will show you how to set up automatic uploads to TestFlight using GitHub actions.
+
+#### iOS
+
+1. [Install](https://docs.fastlane.tools/getting-started/ios/setup/) TestFlight
+
+2. Initialize Fastlane
+
+```bash
+cd ~/mothertongues-UI/platforms/ios && fastlane init
+```
+
+3. Select `2. 👩‍✈️  Automate beta distribution to TestFlight`.
+
+Fastlane will add a Gemfile, Gemfile.lock and fastlane folder to your project.
+
+:::important
+You should have already created your provisioning profile and other credentials. See step 7-9 of ['Building with Xcode](#building-with-xcode)
+:::
+
+4. Automate code-signing
+
+Replace the step in your `fastlane/Fastfile` with the following:
+
+```ruby
+platform :ios do
+  lane :beta do
+    automatic_code_signing(
+      path: "<YOUR_XCODE_PROJ_NAME>.xcodeproj",
+      use_automatic_signing: true
+    )
+    # Increment the build number (not the version number)
+    # Providing the xcodeproj is optional
+    increment_build_number(xcodeproj: "<YOUR_XCODE_PROJ_NAME>.xcodeproj")
+
+    build_app(workspace: "<YOUR_XCODE_PROJ_NAME>.xcworkspace", scheme: "<YOUR_XCODE_PROJ_NAME>", xcargs: "-UseModernBuildSystem=NO")
+    upload_to_app_store
+  end
+end
+```
+
+5. [Automate version and build numbers in Xcode](https://developer.apple.com/library/archive/qa/qa1827/_index.html)
+
+First, change your version and set the versioning system to 'Apple Generic'
+
+<img alt="versioning" src={useBaseUrl('img/versioning.png')} />
+
+Change the build numbers
+
+<img alt="build numbers" src={useBaseUrl('img/build-numbers.png')} />
+
+6. Set up an automatic code signing routine using [match](https://codesigning.guide/)
+
+Match lets you save all of your Apple credentials in a single place (using either git, google_cloud or s3). I recommend using git.
+
+To do that, from your `~/mothertongues-UI/platforms/ios` folder, run `fastlane match init` and select git. Then, give it the address of a *private* repo you control.
+
+Then, run `fastlane match appstore` to generate the provisioning profile for your app.
+
+7. Finally, set it all up with GitHub Actions
+
+Set up a new GitHub action with the following:
+
+```yaml
+# This is a basic workflow to help you get started with Actions
+
+name: CI
+
+# Controls when the action will run. Triggers the workflow on push or pull request
+# events but only for the master branch
+on:
+  push:
+    branches: [master]
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  # This workflow contains a single job called "build"
+  build:
+    # The type of runner that the job will run on
+    runs-on: macOS-latest
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v2
+        with:
+          persist-credentials: false
+      - name: Install node
+        uses: actions/setup-node@v1
+        with:
+          node-version: 8.12.0
+      - run: npm install
+      - run: npm install -g ionic cordova
+      - run: ionic cordova build ios --release
+      # Installation
+      - name: Gem Install
+        run: cd $GITHUB_WORKSPACE/platforms/ios && gem install bundler:1.17.2 && bundle install && bundle update --bundler && cd $GITHUB_WORKSPACE
+      # Runs fastlane
+      - name: Fastlane Action
+        uses: maierj/fastlane-action@v1.4.0
+        env: # Or as an environment variable
+          MATCH_PASSWORD: ${{ secrets.MATCH_KEYCHAIN_PASSWORD }}
+          MATCH_KEYCHAIN_NAME: ${{ secrets.MATCH_KEYCHAIN_NAME }}
+          MATCH_KEYCHAIN_PASSWORD: ${{ secrets.MATCH_KEYCHAIN_PASSWORD }}
+          GH_PAT: ${{ secrets.GH_PAT }}
+          FASTLANE_SESSION: ${{ secrets.FASTLANE_SESSION }}
+          FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD: ${{ secrets.FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD }}
+        with:
+          # The lane that should be executed.
+          lane: ci
+          # The relative path from the project root directory to the subdirectory where the fastlane folder is located.
+          subdirectory: ./platforms/ios
+          # The directory where Ruby gems should be installed to and cached. If a relative path is specified, it's applied relative to the location of the Gemfile, which is either the project root or the directory from the `subdirectory` parameter.
+          bundle-install-path: .
+          # The action tracks usage in Firebase by default. You can disable tracking by setting this parameter to 'true'.
+          skip-tracking: true
+
+```
+
+As you can see, there is a whole host of GitHub secrets that have to be created. To break these down:
+
+1. MATCH_PASSWORD
+
+You must provide the password from your *match* encryption here.
+
+2. MATCH_KEYCHAIN_NAME
+
+This is the name of the keychain to be created, I recommend using something basic and memorable
+
+3. MATCH_KEYCHAIN_PASSWORD
+
+You must have a password for the for the keychain
+
+4. GH_PAT
+
+You must [create a GitHub personal access token](https://docs.github.com/en/github/authenticating-to-github/creating-a-personal-access-token) and save it as a secrets
+
+5. FASTLANE_SESSION
+
+You must create a fastlane session. You can do that by running the following with your iTunes Connect email: 
+
+```bash
+fastlane spaceauth -u user@email.com
+```
+
+Save the resulting session as a secret.
+
+:::tip
+These sessions expire, so you will have to renew them. If you are managing multiple apps, you might consider creating a [GitHub Organization](https://docs.github.com/en/enterprise/2.19/admin/user-management/creating-organizations) so that you can share all of these secrets across your builds.
+:::
+
+6. FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD
+
+You must also provide an application specific password by first visiting https://appleid.apple.com/account/manage, and generating a new password.
+
+If you set up your repo with all of these secrets and this action, you can push your code updates, and automatically upload to TestFlight!
+
 ## Web
+
 
 Building your web version is much less involved than building an app, so if this is all you need, count yourself lucky!
 
