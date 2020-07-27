@@ -458,7 +458,7 @@ jobs:
       - name: Install node
         uses: actions/setup-node@v1
         with:
-          node-version: 8.12.0
+          node-version: 12.15.0
       - run: npm install
       - run: npm install -g ionic cordova
       - run: ionic cordova build ios --release
