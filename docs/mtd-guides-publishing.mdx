@@ -374,17 +374,37 @@ Replace the step in your `fastlane/Fastfile` with the following:
 
 ```ruby
 platform :ios do
-  lane :beta do
-    automatic_code_signing(
-      path: "<YOUR_XCODE_PROJ_NAME>.xcodeproj",
-      use_automatic_signing: true
-    )
+  desc "Push a new build to TestFlight"
+  lane :ci do
     # Increment the build number (not the version number)
     # Providing the xcodeproj is optional
     increment_build_number(xcodeproj: "<YOUR_XCODE_PROJ_NAME>.xcodeproj")
-
-    build_app(workspace: "<YOUR_XCODE_PROJ_NAME>.xcworkspace", scheme: "<YOUR_XCODE_PROJ_NAME>", xcargs: "-UseModernBuildSystem=NO")
-    upload_to_app_store
+    create_keychain(
+      name: "foobar",
+      password: ENV["MATCH_KEYCHAIN_PASSWORD"],
+      default_keychain: true,
+      unlock: true,
+      timeout: 3600,
+      require_create: true,
+      add_to_search_list: true
+    )
+    match(app_identifier: "<YOUR_APP_BUNDLE_ID>", type: "appstore", 
+          git_basic_authorization: Base64.strict_encode64(ENV['GH_PAT']), 
+          keychain_name: "foobar", keychain_password: ENV["MATCH_KEYCHAIN_PASSWORD"])
+    disable_automatic_code_signing
+    settings_to_override = {
+      :BUNDLE_IDENTIFIER => "<YOUR_APP_BUNDLE_ID>",
+      :PROVISIONING_PROFILE_SPECIFIER => "match AppStore <YOUR_APP_BUNDLE_ID>",
+      :DEVELOPMENT_TEAM => "D7TR486TEH",
+      :UseModernBuildSystem => "NO",
+    }
+    build_app(workspace: "<YOUR_XCODE_PROJ_NAME>.xcworkspace", 
+              scheme: "<YOUR_XCODE_PROJ_NAME>", 
+              xcargs: settings_to_override,
+              disable_xcpretty: true, 
+              export_method: 'app-store', 
+              export_options: { provisioningProfiles: { "<YOUR_APP_BUNDLE_ID>" => "match AppStore <YOUR_APP_BUNDLE_ID>" }})
+    upload_to_app_store(force: true)
   end
 end
 ```
