@@ -208,22 +208,22 @@ ionic cordova build android --release
 ```
 
 Your app will then be built at
-`~/mothertongues-UI/resources/platforms/android/app/build/outputs/apk/release/app-release-unsigned.apk`.
+`~/mothertongues-UI/platforms/android/app/build/outputs/apk/release/app-release-unsigned.apk`.
 
 4. Then, sign your app,
 
 ```bash
-jarsigner -verbose -sigalg SHA1withRSA -digestalg SHA1 -keystore "your.keystore" "~/mothertongues-UI/resources/platforms/android/app/build/outputs/apk/release/app-release-unsigned.apk" alias_name
+jarsigner -verbose -sigalg SHA1withRSA -digestalg SHA1 -keystore "your.keystore" "~/mothertongues-UI/platforms/android/app/build/outputs/apk/release/app-release-unsigned.apk" alias_name
 ```
 
 5. Then, zip-align your app,
 
 ```bash
-zipalign -v 4 "~/mothertongues-UI/resources/platforms/android/app/build/outputs/apk/release/app-release-unsigned.apk" "~/mothertongues-UI/resources/platforms/android/app/build/outputs/apk/release/release.apk"
+zipalign -v 4 "~/mothertongues-UI/platforms/android/app/build/outputs/apk/release/app-release-unsigned.apk" "~/mothertongues-UI/platforms/android/app/build/outputs/apk/release/release.apk"
 ```
 
 Then, create a new app and upload your
-`~/mothertongues-UI/resources/platforms/android/app/build/outputs/apk/release/release.apk`
+`~/mothertongues-UI/platforms/android/app/build/outputs/apk/release/release.apk`
 file.
 
 ### Re-building
@@ -254,7 +254,7 @@ And drag/drop your apk:
 
 <img alt="opt out" src={useBaseUrl('img/add-apk.png')} />
 
-Then, you can upload the `~/mothertongues-UI/resources/platforms/android/app/build/outputs/apk/release/release.apk` file
+Then, you can upload the `~/mothertongues-UI/platforms/android/app/build/outputs/apk/release/release.apk` file
 
 If you've successfully checked off all of the boxes, you can review and 'roll out' your release to production to publish on the Google Play Store after testing it out.
 The screenshot below shows boxes that **have not** been checked:
