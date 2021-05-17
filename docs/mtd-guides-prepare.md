@@ -535,5 +535,5 @@ app on Google Play or the Apple App Store, see [Publishing your Mother
 Tongues Dictionary](mtd-guides-publishing).
 
 :::tip
-If you just edit the configuration files in your clone/fork of the `mtd-starter` repo and push the changes, the demo will be automatically built and available at `https://YOUR_GITHUB_USERNAME.github.io/mtd-starter/`
+If you just edit the configuration files in your clone/fork of the `mtd-starter` repo and push the changes, the demo will be automatically built and available at `https://YOUR_GITHUB_USERNAME.github.io/mtd-starter/`. Note that you will have to [enable GitHub Actions](https://docs.github.com/en/github/administering-a-repository/disabling-or-limiting-github-actions-for-a-repository#managing-github-actions-permissions-for-your-repository) on your MTD starter for the automatic builds to work.
 :::
