@@ -1,7 +1,7 @@
 module.exports = {
   title: 'Mother Tongues',
   tagline: 'Tools for language revitalization',
-  url: 'https://docs.mothertongues.org',
+  url: 'https://mothertongues.github.io/mothertongues-docs/',
   baseUrl: '/',
   favicon: 'img/favicon.ico',
   organizationName: 'MotherTongues', // Usually your GitHub org/user name.
